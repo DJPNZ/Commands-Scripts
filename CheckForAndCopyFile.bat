@@ -1,3 +1,7 @@
+:: This was used to create a folder structure inside and copy a file into 100+ folders that already existed. 
+:: Must be run from within the directory that contains the destination directories.
+
+
 @echo off
 setlocal
 
