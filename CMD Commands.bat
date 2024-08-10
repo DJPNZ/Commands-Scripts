@@ -27,4 +27,4 @@ net user /add username pass
 TAKEOWN /F "[Target Folder]" /R /D Y
 
 #Repair ShadowProtect corrupted file
-C:\Program Files (x86)\StorageCraft\ImageManager772\x64\Image v "[Backup File Path]\D_VOL-b001-i1971-cd-cw.spi"
+"C:\Program Files (x86)\StorageCraft\ImageManager\x64\image" v "[Backup File Path]\D_VOL-b001-i1971-cd-cw.spi"
