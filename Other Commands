@@ -1,0 +1,40 @@
+#Pull Unifi AP Config
+less /tmp/system.cfg
+
+#Factory reset Unifi AP
+syswrapper.sh restore-default
+
+#To recover a backup job in SPX:
+    Log in to the SPX GUI.
+    Mount the most recent backup image of the OS volume with read permissions (see Restoring Files and Folders for more information).
+    Navigate to the following folder on the mounted volume:
+Program Data\StorageCraft\spx
+    Copy the listed .json files and spx.db3 files to a temporary folder:
+    spx_config.json
+    spx_service_config.json
+    spx.db3
+
+#How to turn off SIP ALG on a FortiGate firewall
+##Logon to your FortiGate’s console and run
+config system session-helper
+show
+Find the entry which shows ‘set name sip’ (note the ID - it’s usually 13)
+delete 13 (or the number shown on your firewall)
+end
+config system settings
+set default-voip-alg-mode kernel-helper-based
+end
+config voip profile
+edit default
+config sip 
+set status disable
+end 
+end
+Reboot the router
+
+
+#?
+config system interface
+edit lan2
+set status up
+end
