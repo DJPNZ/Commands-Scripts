@@ -17,17 +17,6 @@ less /tmp/system.cfg
 #Factory reset Unifi AP
 syswrapper.sh restore-default
 
-#Add AzureAD account to local administrators group       
-net localgroup Administrators AzureAD\Username /add
-
-#Fix broken Windows Hello Pin/Facial
-takeown /f %windir%\ServiceProfiles\LocalService\AppData\Local\Microsoft\NGC /r /d y
-icacls %windir%\ServiceProfiles\LocalService\AppData\Local\Microsoft\NGC /grant administrators:F /t
-
-#DISM Repairs
-DISM /Online /Cleanup-Image /CheckHealth
-DISM /Online /Cleanup-Image /ScanHealth
-DISM /Online /Cleanup-Image /RestoreHealth
 
 #Email delegation with no mapping
 Add-MailboxPermission -Identity [Target Email] -User [Email] -AccessRights FullAccess -AutoMapping $false
@@ -36,7 +25,6 @@ Add-MailboxPermission -Identity [Target Email] -User [Email] -AccessRights FullA
 Get-Mailbox -resultsize unlimited | Get-MailboxPermission | Select Identity, User, Deny, AccessRights, IsInherited| Export-Csv -Path "c:\temp\mailboxpermissions.csv" –NoTypeInformation
 
 #Testing IRM (For email encryption)
-Run Windows PowerShell as Administrator
 Set-ExecutionPolicy Unrestricted (type A for Yes to All)
 Install-Module -Name ExchangeOnlineManagement
 Update-Module -Name ExchangeOnlineManagement
@@ -61,43 +49,18 @@ Set-IRMConfiguration -AzureRMSLicensingEnabled $True -InternalLicensingEnabled $
 Set-IRMConfiguration -SimplifiedClientAccessEnabled $True
 
 
-#Revert M365 Apps to previous version
-https://support.microsoft.com/en-us/topic/how-to-revert-to-an-earlier-version-of-office-2bd5c457-a917-d57e-35a1-f709e3dda841
-setup.exe /configure config.xml
-<Configuration>
-<Updates Enabled="TRUE" TargetVersion="16.0.xxxxx.yyyyy" />
-</Configuration>
-
-#Set NZ NTP Pool
-net stop w32time
-w32tm /config /syncfromflags:manual /manualpeerlist:nz.pool.ntp.org
-w32tm /config /reliable:yes
-net start w32time
-
-#Check NTP settings
-w32tm /query /configuration
-w32tm /query /status
-
 #Connect to SharePoint
 Connect-SPOService -Url [Sharepoint URL] -Credential [Admin Email]
 
 #Remove "Add Shortcuts to OneDrive" link from SharePoint
 Set-SPOTenant -DisableAddShortcutsToOneDrive $True
 
-#Take ownership of folder
-TAKEOWN /F "[Target Folder]" /R /D Y
+
 
 #Purge all (or individual) deleted users from M365
 Get-MsolUser -ReturnDeletedUsers | Remove-MsolUser -RemoveFromRecycleBin -Force
 Remove-MsolUser -UserPrincipalName ‘DemoUser5@Priasoft.mail.onmicrosoft.com’ -RemoveFromRecycleBin
 
-
-#Create an Admin User Account Using CMD Prompt
-net user /add username pass
-
-
-#Repair ShadowProtect corrupted file
-C:\Program Files (x86)\StorageCraft\ImageManager772\x64\Image v "[Backup File Path]\D_VOL-b001-i1971-cd-cw.spi"
 
 #To recover a backup job in SPX:
     Log in to the SPX GUI.
