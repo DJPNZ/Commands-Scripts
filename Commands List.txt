@@ -6,10 +6,10 @@ Connect-ExchangeOnline -Credential $Credential -ShowBanner:$False
 Disconnect-ExchangeOnline -Confirm:$False
  
 #Create New Office 365 Group with non-default domain
-New-UnifiedGroup -DisplayName "NSW Sales" -Alias "nsw.sales" ` -EmailAddresses "nsw.sales@airtight.com.au" -AccessType Private
+New-UnifiedGroup -DisplayName "[Display Name]" -Alias "[Alias]" ` -EmailAddresses "[Email]" -AccessType Private
 
-#Adopt Unifi AP to iTops CloudKey
-set-inform http://rmm.itops.nz:8080/inform
+#Adopt Unifi AP to externally accessible CloudKey
+set-inform [External CloudKey Address]
 
 #Pull Unifi AP Config
 less /tmp/system.cfg
@@ -18,7 +18,7 @@ less /tmp/system.cfg
 syswrapper.sh restore-default
 
 #Add AzureAD account to local administrators group       
-net localgroup Administrators AzureAD\JoyGodding /add
+net localgroup Administrators AzureAD\Username /add
 
 #Fix broken Windows Hello Pin/Facial
 takeown /f %windir%\ServiceProfiles\LocalService\AppData\Local\Microsoft\NGC /r /d y
@@ -30,7 +30,7 @@ DISM /Online /Cleanup-Image /ScanHealth
 DISM /Online /Cleanup-Image /RestoreHealth
 
 #Email delegation with no mapping
-Add-MailboxPermission -Identity Tim@rwfinancial.co.nz -User joseph@rwfinancial.co.nz -AccessRights FullAccess -AutoMapping $false
+Add-MailboxPermission -Identity [Target Email] -User [Email] -AccessRights FullAccess -AutoMapping $false
 
 #Pull delegation list (shared mailboxes and user mailboxes)
 Get-Mailbox -resultsize unlimited | Get-MailboxPermission | Select Identity, User, Deny, AccessRights, IsInherited| Export-Csv -Path "c:\temp\mailboxpermissions.csv" –NoTypeInformation
@@ -41,8 +41,8 @@ Set-ExecutionPolicy Unrestricted (type A for Yes to All)
 Install-Module -Name ExchangeOnlineManagement
 Update-Module -Name ExchangeOnlineManagement
 Import-Module ExchangeOnlineManagement
-Connect-ExchangeOnline -UserPrincipalName administrator@webtools.co.nz (change adminaccount@contoso.com to the admin email address of the tenant)
-Test-IRMConfiguration -Sender sender@contoso.com -Recipient recipient@contoso.com (change sender and recipient to the correct email addresses)
+Connect-ExchangeOnline -UserPrincipalName [Email] (change email to the admin email address of the tenant)
+Test-IRMConfiguration -Sender [Sender Email] -Recipient [Recipient Email] (change sender and recipient to the correct email addresses)
 
 
 #Enable IRM (For email encryption)
@@ -79,13 +79,13 @@ w32tm /query /configuration
 w32tm /query /status
 
 #Connect to SharePoint
-Connect-SPOService -Url https://vortexengineeringltd-admin.sharepoint.com/ -Credential itops@vortexeng.co.nz
+Connect-SPOService -Url [Sharepoint URL] -Credential [Admin Email]
 
 #Remove "Add Shortcuts to OneDrive" link from SharePoint
 Set-SPOTenant -DisableAddShortcutsToOneDrive $True
 
 #Take ownership of folder
-TAKEOWN /F "G:\Users\GrantCOLD" /R /D Y
+TAKEOWN /F "[Target Folder]" /R /D Y
 
 #Purge all (or individual) deleted users from M365
 Get-MsolUser -ReturnDeletedUsers | Remove-MsolUser -RemoveFromRecycleBin -Force
@@ -93,11 +93,11 @@ Remove-MsolUser -UserPrincipalName ‘DemoUser5@Priasoft.mail.onmicrosoft.com’
 
 
 #Create an Admin User Account Using CMD Prompt
-net user /add admvor pass
+net user /add username pass
 
 
 #Repair ShadowProtect corrupted file
-C:\Program Files (x86)\StorageCraft\ImageManager772\x64\Image v "E:\POWSRV01\Data Drive\D_VOL-b001-i1971-cd-cw.spi"
+C:\Program Files (x86)\StorageCraft\ImageManager772\x64\Image v "[Backup File Path]\D_VOL-b001-i1971-cd-cw.spi"
 
 #To recover a backup job in SPX:
     Log in to the SPX GUI.
@@ -111,8 +111,7 @@ Program Data\StorageCraft\spx
 
 
 #How to turn off SIP ALG on a FortiGate firewall
-Logon to your FortiGate’s console
-
+##Logon to your FortiGate’s console and run
 config system session-helper
 show
 Find the entry which shows ‘set name sip’ (note the ID - it’s usually 13)
@@ -130,18 +129,10 @@ end
 Reboot the router
 
 
-#Wrong tenancy
+#Removing wrong sharepoint / microsoft tenancy
 Remove mail profile. Open regedit. \HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\16.0\Common\Identity\Identities\ remove the key that points to the old tenant. Create mail profile
-
-
-
-
 
 config system interface
 edit lan2
 set status up
 end
-
-syrah-api.centrastage.net/api
-
-60602451
