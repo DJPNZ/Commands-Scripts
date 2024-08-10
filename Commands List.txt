@@ -1,0 +1,147 @@
+ 
+#Connect to Exchange Online
+Connect-ExchangeOnline -Credential $Credential -ShowBanner:$False
+
+#Disconnect Exchange Online
+Disconnect-ExchangeOnline -Confirm:$False
+ 
+#Create New Office 365 Group with non-default domain
+New-UnifiedGroup -DisplayName "NSW Sales" -Alias "nsw.sales" ` -EmailAddresses "nsw.sales@airtight.com.au" -AccessType Private
+
+#Adopt Unifi AP to iTops CloudKey
+set-inform http://rmm.itops.nz:8080/inform
+
+#Pull Unifi AP Config
+less /tmp/system.cfg
+
+#Factory reset Unifi AP
+syswrapper.sh restore-default
+
+#Add AzureAD account to local administrators group       
+net localgroup Administrators AzureAD\JoyGodding /add
+
+#Fix broken Windows Hello Pin/Facial
+takeown /f %windir%\ServiceProfiles\LocalService\AppData\Local\Microsoft\NGC /r /d y
+icacls %windir%\ServiceProfiles\LocalService\AppData\Local\Microsoft\NGC /grant administrators:F /t
+
+#DISM Repairs
+DISM /Online /Cleanup-Image /CheckHealth
+DISM /Online /Cleanup-Image /ScanHealth
+DISM /Online /Cleanup-Image /RestoreHealth
+
+#Email delegation with no mapping
+Add-MailboxPermission -Identity Tim@rwfinancial.co.nz -User joseph@rwfinancial.co.nz -AccessRights FullAccess -AutoMapping $false
+
+#Pull delegation list (shared mailboxes and user mailboxes)
+Get-Mailbox -resultsize unlimited | Get-MailboxPermission | Select Identity, User, Deny, AccessRights, IsInherited| Export-Csv -Path "c:\temp\mailboxpermissions.csv" –NoTypeInformation
+
+#Testing IRM (For email encryption)
+Run Windows PowerShell as Administrator
+Set-ExecutionPolicy Unrestricted (type A for Yes to All)
+Install-Module -Name ExchangeOnlineManagement
+Update-Module -Name ExchangeOnlineManagement
+Import-Module ExchangeOnlineManagement
+Connect-ExchangeOnline -UserPrincipalName administrator@webtools.co.nz (change adminaccount@contoso.com to the admin email address of the tenant)
+Test-IRMConfiguration -Sender sender@contoso.com -Recipient recipient@contoso.com (change sender and recipient to the correct email addresses)
+
+
+#Enable IRM (For email encryption)
+Connect-ExchangeOnline
+Install-Module -Name AIPService
+Connect-AIPService
+Enable-AIPService
+$rmsConfig = Get-AIPServiceConfiguration
+$licenseUri = $rmsConfig.LicensingIntranetDistributionPointUrl
+$irmConfig = Get-IRMConfiguration
+$list = $irmConfig.LicensingLocation
+if (!$list) { $list = @() }
+if (!$list.Contains($licenseUri)) { $list += $LicenseUri }
+Set-IRMConfiguration -LicensingLocation $list
+Set-IRMConfiguration -AzureRMSLicensingEnabled $True -InternalLicensingEnabled $True
+Set-IRMConfiguration -SimplifiedClientAccessEnabled $True
+
+
+#Revert M365 Apps to previous version
+https://support.microsoft.com/en-us/topic/how-to-revert-to-an-earlier-version-of-office-2bd5c457-a917-d57e-35a1-f709e3dda841
+setup.exe /configure config.xml
+<Configuration>
+<Updates Enabled="TRUE" TargetVersion="16.0.xxxxx.yyyyy" />
+</Configuration>
+
+#Set NZ NTP Pool
+net stop w32time
+w32tm /config /syncfromflags:manual /manualpeerlist:nz.pool.ntp.org
+w32tm /config /reliable:yes
+net start w32time
+
+#Check NTP settings
+w32tm /query /configuration
+w32tm /query /status
+
+#Connect to SharePoint
+Connect-SPOService -Url https://vortexengineeringltd-admin.sharepoint.com/ -Credential itops@vortexeng.co.nz
+
+#Remove "Add Shortcuts to OneDrive" link from SharePoint
+Set-SPOTenant -DisableAddShortcutsToOneDrive $True
+
+#Take ownership of folder
+TAKEOWN /F "G:\Users\GrantCOLD" /R /D Y
+
+#Purge all (or individual) deleted users from M365
+Get-MsolUser -ReturnDeletedUsers | Remove-MsolUser -RemoveFromRecycleBin -Force
+Remove-MsolUser -UserPrincipalName ‘DemoUser5@Priasoft.mail.onmicrosoft.com’ -RemoveFromRecycleBin
+
+
+#Create an Admin User Account Using CMD Prompt
+net user /add admvor pass
+
+
+#Repair ShadowProtect corrupted file
+C:\Program Files (x86)\StorageCraft\ImageManager772\x64\Image v "E:\POWSRV01\Data Drive\D_VOL-b001-i1971-cd-cw.spi"
+
+#To recover a backup job in SPX:
+    Log in to the SPX GUI.
+    Mount the most recent backup image of the OS volume with read permissions (see Restoring Files and Folders for more information).
+    Navigate to the following folder on the mounted volume:
+Program Data\StorageCraft\spx
+    Copy the listed .json files and spx.db3 files to a temporary folder:
+    spx_config.json
+    spx_service_config.json
+    spx.db3
+
+
+#How to turn off SIP ALG on a FortiGate firewall
+Logon to your FortiGate’s console
+
+config system session-helper
+show
+Find the entry which shows ‘set name sip’ (note the ID - it’s usually 13)
+delete 13 (or the number shown on your firewall)
+end
+config system settings
+set default-voip-alg-mode kernel-helper-based
+end
+config voip profile
+edit default
+config sip 
+set status disable
+end 
+end
+Reboot the router
+
+
+#Wrong tenancy
+Remove mail profile. Open regedit. \HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\16.0\Common\Identity\Identities\ remove the key that points to the old tenant. Create mail profile
+
+
+
+
+
+config system interface
+edit lan2
+set status up
+end
+
+syrah-api.centrastage.net/api
+
+60602451
