@@ -9,7 +9,7 @@ function Update-ExternalSharing {
 
     try {
         # Connect to SharePoint Online Admin Center
-        $adminUrl = "https://followmyleadnz-admin.sharepoint.com"
+        $adminUrl = "https://[tenant]-admin.sharepoint.com"
         Connect-SPOService -Url $adminUrl
 
         # Verify the connection
@@ -33,7 +33,7 @@ function Update-ExternalSharing {
 
 # Prompt for the site name
 $siteName = Read-Host "Enter the name of the SharePoint site you want to update"
-$siteUrl = "https://followmyleadnz.sharepoint.com/sites/$siteName"
+$siteUrl = "https://[tenant].sharepoint.com/sites/$siteName"
 
 # Output the site URL for confirmation
 Write-Host "Updating site: $siteUrl" -ForegroundColor Yellow
